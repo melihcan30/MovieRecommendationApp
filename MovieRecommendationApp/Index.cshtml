@@ -1,0 +1,64 @@
+﻿@page
+@model MovieRecommendationApp.IndexModel
+@{
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Benzer Filmler Uygulaması</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>Benzer Filmler Uygulaması</h1>
+    <form id="searchForm">
+        <label for="movieTitle">Film Adı:</label>
+        <input type="text" id="movieTitle" name="movieTitle" required>
+        <button type="submit">Benzer Filmleri Bul</button>
+    </form>
+
+    <div id="resultContainer"></div>
+
+    <script>
+        $(document).ready(function() {
+            $('#searchForm').submit(function(e) {
+                e.preventDefault();
+                var movieTitle = $('#movieTitle').val();
+                searchSimilarMovies(movieTitle);
+            });
+        });
+
+        function searchSimilarMovies(movieTitle) {
+            $.ajax({
+                url: '/api/SimilarMovies?movieTitle=' + encodeURIComponent(movieTitle),
+                type: 'GET',
+                success: function(response) {
+                    showResults(response);
+                },
+                error: function(xhr) {
+                    showError(xhr.responseText);
+                }
+            });
+        }
+
+        function showResults(movies) {
+            var resultContainer = $('#resultContainer');
+            resultContainer.empty();
+            if (movies.length > 0) {
+                resultContainer.append('<h2>Benzer Filmler:</h2>');
+                var ul = $('<ul>');
+                $.each(movies, function(index, movie) {
+                    ul.append('<li>' + movie.Title + ' (' + movie.Year + ')</li>');
+                });
+                resultContainer.append(ul);
+            } else {
+                resultContainer.text('Benzer film bulunamadı.');
+            }
+        }
+
+        function showError(errorMessage) {
+            var resultContainer = $('#resultContainer');
+            resultContainer.text('Hata: ' + errorMessage);
+        }
+    </script>
+</body>
+</html>
